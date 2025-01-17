@@ -2,32 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="ChatGPT-Style Insurance Assistant - A user-friendly chat interface for insurance queries.">
+    <meta name="author" content="Your Name">
     <title>ChatGPT-Style Insurance Assistant</title>
+
+    <!-- External Resources -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://via.placeholder.com/32" type="image/png">
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
+        <!-- Chat Header -->
+        <header class="chat-header" role="banner">
             <h2><i class="fas fa-comments"></i> Chat Assistant</h2>
-        </div>
-        <div class="chat-options">
+        </header>
+
+        <!-- Options Section -->
+        <section class="chat-options" aria-label="Model and Build Selection">
             <label for="fm-select">Select FM Model:</label>
-            <select id="fm-select"></select>
+            <select id="fm-select" aria-label="Select FM Model">
+                <option value="" disabled selected>Loading models...</option>
+            </select>
             <label for="build-select">Select Build:</label>
-            <select id="build-select"></select>
-        </div>
-        <div class="chat-history" id="chat-history">
-            <!-- Chat messages will appear here -->
-        </div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off">
-            <button id="send-button"><i class="fas fa-paper-plane"></i></button>
-        </div>
+            <select id="build-select" aria-label="Select Build">
+                <option value="" disabled selected>Loading builds...</option>
+            </select>
+        </section>
+
+        <!-- Chat History -->
+        <main class="chat-history" id="chat-history" role="log" aria-live="polite" aria-atomic="true">
+            <!-- Chat messages will appear here dynamically -->
+        </main>
+
+        <!-- Chat Input -->
+        <footer class="chat-input" role="form">
+            <label for="user-input" class="sr-only">Type your message here:</label>
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Type your message here..." 
+                autocomplete="off" 
+                aria-label="Type your message here">
+            <button id="send-button" aria-label="Send Message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </footer>
     </div>
+
+    <!-- Custom Scripts -->
     <script src="./js.js"></script>
 </body>
 </html>
