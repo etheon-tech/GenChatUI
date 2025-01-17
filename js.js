@@ -3,23 +3,14 @@ $(document).ready(function () {
 
     // Load FM models and builds
     function loadModels() {
-        showLoadingMessage('#fm-select', 'Loading models...');
-        showLoadingMessage('#build-select', 'Loading builds...');
         $.ajax({
-            url: `${BASE_URL}/list_models`,
+            url: ${BASE_URL}/list_models,
             type: 'GET',
             success: function (response) {
-                if (response.available_models && Object.keys(response.available_models).length > 0) {
-                    populateModelDropdowns(response.available_models);
-                } else {
-                    console.warn("No models available.");
-                    displayErrorMessage('#fm-select', 'No models available.');
-                }
+                populateModelDropdowns(response.available_models);
             },
             error: function (xhr) {
                 console.error("Error fetching models:", xhr);
-                displayErrorMessage('#fm-select', 'Failed to load models.');
-                displayErrorMessage('#build-select', 'Failed to load builds.');
             }
         });
     }
@@ -33,18 +24,13 @@ $(document).ready(function () {
 
         // Populate FM models dropdown
         const sortedModels = Object.keys(models).sort();
-        if (sortedModels.length === 0) {
-            displayErrorMessage('#fm-select', 'No models available.');
-            return;
-        }
-
         sortedModels.forEach((model, index) => {
             fmSelect.append(new Option(model, model));
             if (index === 0) populateBuildDropdown(models[model]); // Populate builds for the first FM model
         });
 
-        // Ensure the dropdown works correctly
-        fmSelect.off('change').on('change', function () {
+        // Update builds when a model is selected
+        fmSelect.on('change', function () {
             const selectedModel = $(this).val();
             populateBuildDropdown(models[selectedModel]);
         });
@@ -54,33 +40,34 @@ $(document).ready(function () {
         const buildSelect = $('#build-select');
         buildSelect.empty();
 
-        if (!builds || builds.length === 0) {
-            displayErrorMessage('#build-select', 'No builds available.');
-            return;
-        }
-
-        builds.sort().forEach(build => {
+        builds.sort().forEach((build, index) => {
             buildSelect.append(new Option(build, build));
         });
     }
+
+    $('#send-button').on('click', function () {
+        sendMessage();
+    });
+
+    $('#user-input').on('keypress', function (e) {
+        if (e.which === 13) {
+            sendMessage();
+        }
+    });
 
     function sendMessage() {
         let query = $('#user-input').val().trim();
         const fmModel = $('#fm-select').val();
         const buildName = $('#build-select').val();
 
-        if (!query) {
-            alert('Please enter a message.');
-            return;
-        }
+        if (query === '') return;
 
         appendMessage('user', query);
+
         $('#user-input').val('');
 
-        appendMessage('bot', 'Processing your request...');
-
         $.ajax({
-            url: `${BASE_URL}/predict`,
+            url: ${BASE_URL}/predict,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ query, model_name: fmModel, build_name: buildName }),
@@ -88,14 +75,13 @@ $(document).ready(function () {
                 appendMessage('bot', processResponse(response));
             },
             error: function (xhr) {
-                console.error("Error sending message:", xhr);
-                appendMessage('bot', `Error: ${xhr.responseText || "No response from server."}`);
+                appendMessage('bot', Error: ${xhr.responseText || "No response"});
             }
         });
     }
 
     function appendMessage(sender, message) {
-        let messageElement = $('<div>', { class: `chat-message ${sender}` });
+        let messageElement = $('<div>', { class: chat-message ${sender} });
         let messageContent = $('<div>', { class: 'message-content' }).html(message);
         messageElement.append(messageContent);
         $('#chat-history').append(messageElement);
@@ -106,11 +92,11 @@ $(document).ready(function () {
         if (response.predicted_intents && response.predicted_intents.length > 0) {
             let predictionsHTML = '<strong>Predictions:</strong><ul>';
             response.predicted_intents.forEach(prediction => {
-                predictionsHTML += `
+                predictionsHTML += 
                     <li>
                         <strong>Intent:</strong> ${prediction.intent}<br>
                         <strong>Confidence:</strong> ${(prediction.confidence * 100).toFixed(2)}%
-                    </li>`;
+                    </li>;
             });
             predictionsHTML += '</ul>';
             return predictionsHTML;
@@ -118,21 +104,6 @@ $(document).ready(function () {
             return 'No predictions found.';
         }
     }
-
-    function showLoadingMessage(selector, message) {
-        $(selector).empty().append(new Option(message, '', true, true));
-    }
-
-    function displayErrorMessage(selector, message) {
-        $(selector).empty().append(new Option(message, '', true, true));
-    }
-
-    // Attach event listeners
-    $('#send-button').on('click', sendMessage);
-
-    $('#user-input').on('keypress', function (e) {
-        if (e.which === 13) sendMessage();
-    });
 
     // Load models on page load
     loadModels();
