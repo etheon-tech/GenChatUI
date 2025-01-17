@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RAG Chat MVP</title>
+  <style>
+    /* Reset and basic typography */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "Open Sans", sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #c9d6ff);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Chat Container */
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      height: 80vh;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Chat Header */
+    .chat-header {
+      background: linear-gradient(135deg, #6d5dfc, #b76dfc);
+      padding: 16px;
+      text-align: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Chat Messages */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background-color: #f9f9fc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Bubbles */
+    .message {
+      max-width: 80%;
+      margin: 8px 0;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.2s ease-in-out;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .user-message {
+      align-self: flex-end;
+      background: #a6d6ff;
+      border-top-right-radius: 2px;
+    }
+    .ai-message {
+      align-self: flex-start;
+      background: #e2e2e2;
+      border-top-left-radius: 2px;
+    }
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #555;
+      border-radius: 50%;
+      animation: typing 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    /* Chat Footer */
+    .chat-footer {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      background-color: #f7f7f7;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .chat-input:focus {
+      border: 1px solid #6d5dfc;
+    }
+    .send-btn {
+      margin-left: 8px;
+      background: linear-gradient(135deg, #6d5dfc, #b76dfc);
+      border: none;
+      color: #fff;
+      padding: 12px 20px;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: 600;
+    }
+    .send-btn:hover {
+      background: linear-gradient(135deg, #7d6ffc, #c77dfc);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.6); }
+      40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>RAG Chat</h1>
+      <p style="font-size: 0.8rem;">Ask for the latest updates on clients!</p>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <!-- Dynamic content goes here -->
+    </div>
+
+    <div class="chat-footer">
+      <input
+        type="text"
+        id="chat-input"
+        class="chat-input"
+        placeholder="Type your question..."
+        onkeydown="if(event.key === 'Enter') sendMessage()"
+      />
+      <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const RAG_ENDPOINT = 'https://polisenceai-ramg.run.goorm.site/search';
+
+    let typingIndicatorBubble = null;
+
+    function addMessageBubble(text, isUser = false) {
+      const bubble = document.createElement('div');
+      bubble.classList.add('message');
+      bubble.classList.add(isUser ? 'user-message' : 'ai-message');
+      bubble.textContent = text;
+      chatMessages.appendChild(bubble);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return bubble;
+    }
+
+    function showTypingIndicator() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('message', 'ai-message', 'typing-indicator');
+
+      const dot1 = document.createElement('div');
+      const dot2 = document.createElement('div');
+      const dot3 = document.createElement('div');
+      dot1.classList.add('typing-dot');
+      dot2.classList.add('typing-dot');
+      dot3.classList.add('typing-dot');
+
+      bubble.appendChild(dot1);
+      bubble.appendChild(dot2);
+      bubble.appendChild(dot3);
+
+      chatMessages.appendChild(bubble);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      typingIndicatorBubble = bubble;
+    }
+
+    function removeTypingIndicator() {
+      if (typingIndicatorBubble) {
+        chatMessages.removeChild(typingIndicatorBubble);
+        typingIndicatorBubble = null;
+      }
+    }
+
+async function sendMessage() {
+  const userQuery = chatInput.value.trim();
+  if (!userQuery) return;
+
+  addMessageBubble(userQuery, true);
+  chatInput.value = '';
+
+  // Show typing indicator
+  showTypingIndicator();
+
+  try {
+    const response = await fetch(RAG_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: userQuery }),
+    });
+
+    // Check if the response is not OK
+    if (!response.ok) {
+      removeTypingIndicator();
+
+      // Parse the backend error message
+      try {
+        const errorData = await response.json();
+        addMessageBubble(JSON.stringify(errorData), false); // Display the JSON response directly
+      } catch (parseError) {
+        // Fallback for cases where JSON parsing fails
+        addMessageBubble(
+          `Error: ${response.status} - ${response.statusText}`,
+          false
+        );
+      }
+      return;
+    }
+
+    // Parse the successful response
+    const data = await response.json();
+    removeTypingIndicator();
+
+    const contact = data.contact;
+    const conversation = data.conversation.messages.messages;
+    const summary = data.summary;
+
+    addMessageBubble(
+      `Contact Name: ${contact['Contact Name']}
+Email: ${contact.Email || 'N/A'}
+Phone: ${contact.Phone}`,
+      false
+    );
+
+    addMessageBubble(`Summary: ${summary}`, false);
+
+    // conversation.forEach((msg) => {
+    //   addMessageBubble(
+    //     `[${msg.dateAdded} | ${msg.direction}] ${msg.body || '[No content]'}`,
+    //     false
+    //   );
+    // });
+  } catch (err) {
+    // Handle network or fetch-related errors
+    removeTypingIndicator();
+    addMessageBubble('Name cant be found in the database. Please your input.', false);
+    console.error('Fetch error:', err);
+  }
+}
+
+
+  </script>
+</body>
+</html>
