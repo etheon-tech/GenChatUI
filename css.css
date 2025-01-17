@@ -1,4 +1,4 @@
-/* Updated CSS for ChatGPT-Style Chat UI */
+/* Enhanced CSS for ChatGPT-Style Chat UI */
 body {
     font-family: 'Roboto', sans-serif;
     background-color: #121212;
@@ -11,15 +11,18 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    max-width: 100%;
+    width: 100%;
+    max-width: 600px;
     margin: 0 auto;
     background-color: #1E1E1E;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .chat-header {
     background-color: #007BFF;
-    padding: 15px;
+    padding: 15px 20px;
     color: #FFFFFF;
     text-align: center;
 }
@@ -27,6 +30,7 @@ body {
 .chat-header h2 {
     margin: 0;
     font-size: 24px;
+    letter-spacing: 1px;
 }
 
 .chat-options {
@@ -43,9 +47,15 @@ body {
     color: #FFFFFF;
     border: 1px solid #555555;
     border-radius: 5px;
-    padding: 5px;
+    padding: 8px 10px;
     font-size: 14px;
     outline: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.chat-options select:hover {
+    background-color: #007BFF;
+    color: #FFFFFF;
 }
 
 .chat-history {
@@ -70,12 +80,13 @@ body {
 
 .message-content {
     max-width: 80%;
-    padding: 10px 15px;
+    padding: 12px 18px;
     border-radius: 20px;
     position: relative;
     word-wrap: break-word;
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1.5;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .chat-message.user .message-content {
@@ -85,8 +96,8 @@ body {
 }
 
 .chat-message.bot .message-content {
-    background-color: white;
-    color: black;
+    background-color: #333333;
+    color: #FFFFFF;
     border-bottom-left-radius: 0;
 }
 
@@ -94,32 +105,45 @@ body {
     display: flex;
     align-items: center;
     padding: 10px;
-    background-color: #007bff;
-    border-top: 1px solid #007bff;
+    background-color: #1E1E1E;
+    border-top: 1px solid #444444;
 }
 
 .chat-input input {
     flex: 1;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border: 1px solid #555555;
     border-radius: 25px;
     outline: none;
     font-size: 16px;
-    background-color: white;
-    color: black;
+    background-color: #FFFFFF;
+    color: #000000;
+    transition: border-color 0.3s;
+}
+
+.chat-input input:focus {
+    border-color: #007BFF;
 }
 
 .chat-input button {
-    background-color: transparent;
+    background-color: #007BFF;
     border: none;
     margin-left: 10px;
-    font-size: 24px;
-    color: white;
+    font-size: 18px;
+    color: #FFFFFF;
     cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 25px;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .chat-input button:hover {
-    color: #0056b3;
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+.chat-input button:active {
+    transform: scale(1.05);
 }
 
 /* Scrollbar styling */
@@ -129,4 +153,32 @@ body {
 .chat-history::-webkit-scrollbar-thumb {
     background: #555555;
     border-radius: 4px;
+}
+.chat-history::-webkit-scrollbar-thumb:hover {
+    background: #777777;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .chat-container {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .chat-header h2 {
+        font-size: 20px;
+    }
+
+    .chat-options select {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    .message-content {
+        font-size: 14px;
+    }
+
+    .chat-input input {
+        font-size: 14px;
+    }
 }
